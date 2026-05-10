@@ -56,3 +56,15 @@ python src/ir_system.py eval --file data/eval/qrels.json --mode bm25_prf
 - 默认检索模型升级为 **BM25+PRF**（伪相关反馈查询扩展），通常比原始TF-IDF/BM25更稳。
 - 同时保留 `--mode bm25` 与 `--mode tfidf` 便于对比实验。
 - 新增中英文停用词过滤与标题加权，有助于提升 MAP/P@5。
+
+
+## UI 界面（非命令行）
+
+```bash
+streamlit run src/ui_app.py
+```
+
+功能：
+- 可视化查询与结果展示（score/title/url/snippet）；
+- 勾选式人工相关性标注，直接写入 `data/eval/qrels.json`；
+- 一键计算 MAP/P@5（支持 `bm25_prf/bm25/tfidf`）。
