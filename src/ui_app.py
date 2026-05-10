@@ -7,7 +7,7 @@ import streamlit as st
 from ir_system import InvertedIndex, Searcher, evaluate
 
 st.set_page_config(page_title="中英信息检索系统", layout="wide")
-st.title("📚 中英信息检索系统（带人工评测）")
+st.title("中英信息检索系统")
 
 INDEX_PATH = Path("data/index/index.json")
 QRELS_PATH = Path("data/eval/qrels.json")
@@ -45,7 +45,7 @@ with st.sidebar:
     mode = st.selectbox("检索模型", ["bm25_prf", "bm25", "tfidf"], index=0)
     topk = st.slider("返回条数 TopK", 5, 30, 10)
 
-query = st.text_input("请输入查询（中文或英文）", placeholder="例如：人工智能 / climate change")
+query = st.text_input("请输入查询（中文或英文）", placeholder="例如：优化方法")
 
 if query:
     if mode == "bm25_prf":
@@ -90,6 +90,3 @@ if query:
                 st.code(buf.getvalue())
             except Exception as e:
                 st.error(f"评估失败: {e}")
-
-st.markdown("---")
-st.caption("启动方式：streamlit run src/ui_app.py")
