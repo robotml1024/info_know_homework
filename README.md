@@ -35,3 +35,18 @@ python src/ir_system.py eval --file data/eval/qrels.json
 
 ## 说明
 若网络受限无法抓取 Wikipedia，可将数据源替换为任何公开可爬网页（新闻、博客、论坛等），只要文档数量 ≥ 100 即可。
+
+
+## 人工标注助手（推荐）
+如果你已经完成 `crawl` + `index`，可以用交互式标注工具快速产出 `qrels.json`：
+
+```bash
+cp data/eval/queries.template.txt data/eval/queries.txt
+python src/annotate_qrels.py --queries data/eval/queries.txt --out data/eval/qrels.json --topk 20
+```
+
+标注时输入相关结果序号（如 `1 3 5`），工具会自动保存为查询对应的相关 `doc_id` 列表，可直接用于评估：
+
+```bash
+python src/ir_system.py eval --file data/eval/qrels.json
+```
