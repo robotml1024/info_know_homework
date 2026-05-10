@@ -1,1 +1,58 @@
-# info_know_homework
+# 信息检索系统课程大作业（高分版模板）
+
+## 功能对应评分点
+- ✅ 完整 IR 流水线：爬虫、存储、倒排、向量空间检索、排序输出。
+- ✅ 中英双语支持（中文分词+英文空格分词）。
+- ✅ 输出字段完整：相关度、题目、匹配内容、URL、日期。
+- ✅ 提供人工准确率评价（MAP、P@5）。
+- ✅ 报告中给出可持续发展影响分析与创新拓展方向。
+
+## 环境安装
+```bash
+pip install -r requirements.txt
+```
+
+## 一键流程
+```bash
+python src/ir_system.py crawl --zh 60 --en 60
+python src/ir_system.py index
+python src/ir_system.py search --mode bm25_prf
+```
+
+## 人工评价
+```bash
+cp data/eval/qrels.template.json data/eval/qrels.json
+# 手工修改 qrels.json 中的相关文档ID
+python src/ir_system.py eval --file data/eval/qrels.json --mode bm25_prf
+```
+
+## 目录结构
+- `src/ir_system.py`：主程序（爬虫、索引、检索、评估）
+- `data/raw/`：原始文档 JSONL
+- `data/index/`：倒排索引与统计文件
+- `data/eval/`：人工评价标注文件
+- `reports/report.md`：实验报告
+
+## 说明
+若网络受限无法抓取 Wikipedia，可将数据源替换为任何公开可爬网页（新闻、博客、论坛等），只要文档数量 ≥ 100 即可。
+
+
+## 人工标注助手（推荐）
+如果你已经完成 `crawl` + `index`，可以用交互式标注工具快速产出 `qrels.json`：
+
+```bash
+cp data/eval/queries.template.txt data/eval/queries.txt
+python src/annotate_qrels.py --queries data/eval/queries.txt --out data/eval/qrels.json --topk 20
+```
+
+标注时输入相关结果序号（如 `1 3 5`），工具会自动保存为查询对应的相关 `doc_id` 列表，可直接用于评估：
+
+```bash
+python src/ir_system.py eval --file data/eval/qrels.json --mode bm25_prf
+```
+
+
+## 检索算法优化
+- 默认检索模型升级为 **BM25+PRF**（伪相关反馈查询扩展），通常比原始TF-IDF/BM25更稳。
+- 同时保留 `--mode bm25` 与 `--mode tfidf` 便于对比实验。
+- 新增中英文停用词过滤与标题加权，有助于提升 MAP/P@5。
