@@ -199,6 +199,23 @@ class Searcher:
                 scores[doc_id] += idf * ((tf * (k1 + 1)) / (denom or 1.0)) * (1 + math.log(qf))
         return self._format(scores, 1.0, "bm25", topk, q_tokens)
 
+
+    def search_bm25_prf(self, query: str, topk: int = 10, fb_docs: int = 5, fb_terms: int = 8):
+        base = self.search_bm25(query, topk=max(20, topk))
+        if not base:
+            return []
+        expansion = Counter()
+        for _, d, _ in base[:fb_docs]:
+            tf = self.index.doc_tf.get(d.doc_id, {})
+            for t, c in tf.items():
+                expansion[t] += c
+        q_tokens = self._query_tokens(query)
+        for t in q_tokens:
+            expansion.pop(t, None)
+        add_terms = [t for t, _ in expansion.most_common(fb_terms)]
+        expanded_query = query + " " + " ".join(add_terms)
+        return self.search_bm25(expanded_query, topk=topk)
+
     def _format(self, scores, q_norm, mode, topk, q_tokens):
         ranked = []
         for doc_id, s in scores.items():
@@ -236,7 +253,7 @@ def interactive_search(mode="bm25"):
         q = input("query> ").strip()
         if q.lower() in {"exit", "quit"}:
             break
-        results = s.search_bm25(q, 10) if mode == "bm25" else s.search_tfidf(q, 10)
+        results = s.search_bm25_prf(q, 10) if mode == "bm25_prf" else (s.search_bm25(q, 10) if mode == "bm25" else s.search_tfidf(q, 10))
         for i, (score, d, snip) in enumerate(results, 1):
             print(f"\n[{i}] score={score:.4f}")
             print(f"title: {d.title}")
@@ -253,7 +270,7 @@ def evaluate(eval_file="data/eval/qrels.json", mode="bm25"):
         qrels = json.load(f)
     ap_list, p5_list = [], []
     for q, rel_docs in qrels.items():
-        results = s.search_bm25(q, 20) if mode == "bm25" else s.search_tfidf(q, 20)
+        results = s.search_bm25_prf(q, 20) if mode == "bm25_prf" else (s.search_bm25(q, 20) if mode == "bm25" else s.search_tfidf(q, 20))
         ranked_ids = [d.doc_id for _, d, _ in results]
         rel = set(rel_docs)
         hit, precs = 0, []
@@ -276,10 +293,10 @@ def main():
     c.add_argument("--en", type=int, default=60)
     sub.add_parser("index")
     s = sub.add_parser("search")
-    s.add_argument("--mode", choices=["bm25", "tfidf"], default="bm25")
+    s.add_argument("--mode", choices=["bm25", "tfidf", "bm25_prf"], default="bm25_prf")
     e = sub.add_parser("eval")
     e.add_argument("--file", default="data/eval/qrels.json")
-    e.add_argument("--mode", choices=["bm25", "tfidf"], default="bm25")
+    e.add_argument("--mode", choices=["bm25", "tfidf", "bm25_prf"], default="bm25_prf")
 
     args = p.parse_args()
     if args.cmd == "crawl":

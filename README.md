@@ -16,14 +16,14 @@ pip install -r requirements.txt
 ```bash
 python src/ir_system.py crawl --zh 60 --en 60
 python src/ir_system.py index
-python src/ir_system.py search --mode bm25
+python src/ir_system.py search --mode bm25_prf
 ```
 
 ## 人工评价
 ```bash
 cp data/eval/qrels.template.json data/eval/qrels.json
 # 手工修改 qrels.json 中的相关文档ID
-python src/ir_system.py eval --file data/eval/qrels.json --mode bm25
+python src/ir_system.py eval --file data/eval/qrels.json --mode bm25_prf
 ```
 
 ## 目录结构
@@ -48,11 +48,11 @@ python src/annotate_qrels.py --queries data/eval/queries.txt --out data/eval/qre
 标注时输入相关结果序号（如 `1 3 5`），工具会自动保存为查询对应的相关 `doc_id` 列表，可直接用于评估：
 
 ```bash
-python src/ir_system.py eval --file data/eval/qrels.json --mode bm25
+python src/ir_system.py eval --file data/eval/qrels.json --mode bm25_prf
 ```
 
 
 ## 检索算法优化
-- 默认检索模型升级为 **BM25**（通常比原始TF-IDF排序更稳）。
-- 同时保留 `--mode tfidf` 便于对比实验。
+- 默认检索模型升级为 **BM25+PRF**（伪相关反馈查询扩展），通常比原始TF-IDF/BM25更稳。
+- 同时保留 `--mode bm25` 与 `--mode tfidf` 便于对比实验。
 - 新增中英文停用词过滤与标题加权，有助于提升 MAP/P@5。

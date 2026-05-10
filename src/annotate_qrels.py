@@ -42,7 +42,7 @@ def annotate(query_file: str, out_file: str, topk: int = 20):
 
         print("\n" + "=" * 80)
         print(f"Query: {q}")
-        results = searcher.search_bm25(q, topk=topk)
+        results = searcher.search_bm25_prf(q, topk=topk)
 
         if not results:
             print("无检索结果，记为空标注。")
