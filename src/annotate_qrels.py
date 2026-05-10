@@ -3,7 +3,7 @@ import json
 import os
 from typing import Dict, List
 
-from ir_system import InvertedIndex, VectorSpaceSearcher
+from ir_system import InvertedIndex, Searcher
 
 
 def load_existing(path: str) -> Dict[str, List[str]]:
@@ -22,7 +22,7 @@ def save_qrels(path: str, qrels: Dict[str, List[str]]):
 def annotate(query_file: str, out_file: str, topk: int = 20):
     idx = InvertedIndex()
     idx.load("data/index")
-    searcher = VectorSpaceSearcher(idx)
+    searcher = Searcher(idx)
 
     with open(query_file, "r", encoding="utf-8") as f:
         queries = [line.strip() for line in f if line.strip()]
@@ -42,7 +42,7 @@ def annotate(query_file: str, out_file: str, topk: int = 20):
 
         print("\n" + "=" * 80)
         print(f"Query: {q}")
-        results = searcher.search(q, topk=topk)
+        results = searcher.search_bm25(q, topk=topk)
 
         if not results:
             print("无检索结果，记为空标注。")
